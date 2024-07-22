@@ -1,4 +1,4 @@
-# TypeScript Backend Setup
+# OAuth Backend Setup
 
 ## Overview
 
