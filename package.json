@@ -1,7 +1,7 @@
 {
-  "name": "typescriptbackendsetup",
+  "name": "oauthsetup",
   "version": "1.0.0",
-  "description": "Typescript setup for REST",
+  "description": "OAuth setup for REST",
   "main": "index.ts",
   "scripts": {
     "dev": "webpack --watch --mode development",
@@ -27,6 +27,7 @@
   "keywords": [
     "Typescript",
     "API",
+    "OAuth",
     "Setup",
     "REST"
   ],
