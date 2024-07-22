@@ -1,0 +1,19 @@
+CREATE TABLE users (
+  id VARCHAR(11) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  image_url VARCHAR(255) NOT NULL,
+  email_verified BOOLEAN NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_states (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+  state VARCHAR(255) NOT NULL,
+  provider VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
