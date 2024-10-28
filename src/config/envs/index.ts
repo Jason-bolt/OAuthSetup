@@ -20,6 +20,12 @@ interface IENVS {
   FACEBOOK_REDIRECT_URL: string | undefined;
   FACEBOOK_ACCESS_TOKEN_URL: string | undefined;
   FACEBOOK_TOKEN_INFO_URL: string | undefined;
+  GITHUB_CLIENT_ID: string | undefined;
+  GITHUB_CLIENT_SECRET: string | undefined;
+  GITHUB_OAUTH_URL: string | undefined;
+  GITHUB_REDIRECT_URL: string | undefined;
+  GITHUB_ACCESS_TOKEN_URL: string | undefined;
+  GITHUB_TOKEN_INFO_URL: string | undefined;
 }
 
 const ENVS: IENVS = {
@@ -43,6 +49,13 @@ const ENVS: IENVS = {
   FACEBOOK_REDIRECT_URL: process.env.FACEBOOK_REDIRECT_URL,
   FACEBOOK_ACCESS_TOKEN_URL: process.env.FACEBOOK_ACCESS_TOKEN_URL,
   FACEBOOK_TOKEN_INFO_URL: process.env.FACEBOOK_TOKEN_INFO_URL,
+  // GITHUB OAUTH
+  GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+  GITHUB_OAUTH_URL: process.env.GITHUB_OAUTH_URL,
+  GITHUB_REDIRECT_URL: process.env.GITHUB_REDIRECT_URL,
+  GITHUB_ACCESS_TOKEN_URL: process.env.GITHUB_ACCESS_TOKEN_URL,
+  GITHUB_TOKEN_INFO_URL: process.env.GITHUB_TOKEN_INFO_URL,
 }
 
 export default ENVS;

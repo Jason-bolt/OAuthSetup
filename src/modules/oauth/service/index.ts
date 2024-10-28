@@ -3,12 +3,114 @@ import db, { DatabaseType } from "../../../config/database";
 import logger from "../../../config/logger";
 import ENVS from "../../../config/envs";
 import { GenericHelper } from "../../../utils/helpers/generic.helpers";
+import axios from "axios";
 
 class OauthService implements IOauthService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger
   ) {}
+  initiateGithubOAuth = async (state: string): Promise<string> => {
+    const GITHUB_OAUTH_SCOPES = ["read:user", "user:email"];
+    try {
+      this._logger.info(
+        "---------- OAUTHSERVICE ----------: Initiating Github OAuth"
+      );
+
+      // Save state to database to be called by the get user by state
+      await this.db.none(
+        "INSERT INTO user_states (state, provider) VALUES ($1, $2)",
+        [state, "github"]
+      );
+
+      const scopes = GITHUB_OAUTH_SCOPES.join(" ");
+      const GITHUB_OAUTH_CONSENT_SCREEN_URL = `${ENVS.GITHUB_OAUTH_URL}?client_id=${ENVS.GITHUB_CLIENT_ID}&redirect_uri=${ENVS.GITHUB_REDIRECT_URL}&state=${state}&scope=${scopes}`;
+      return GITHUB_OAUTH_CONSENT_SCREEN_URL;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  githubOAuthCallback = async (query: any): Promise<object> => {
+    try {
+      this._logger.info(
+        "---------- OAUTHSERVICE ----------: Github OAuth callback"
+      );
+      const { code, state } = query;
+      this._logger.info(`Code passed - ${code}`);
+
+      const data = {
+        code,
+        state,
+        client_id: ENVS.GITHUB_CLIENT_ID,
+        client_secret: ENVS.GITHUB_CLIENT_SECRET,
+        redirect_uri: ENVS.GITHUB_REDIRECT_URL,
+      };
+
+      const response = await axios({
+        method: "post",
+        url: `${ENVS.GITHUB_ACCESS_TOKEN_URL}?client_id=${ENVS.GITHUB_CLIENT_ID}&client_secret=${ENVS.GITHUB_CLIENT_SECRET}&code=${code}&state=${state}&redirect_uri=${ENVS.GITHUB_REDIRECT_URL}`,
+        headers: {
+          accept: "application/json",
+        },
+      });
+
+      const { access_token } = response.data as any;
+      const token_info_response = await axios({
+        method: "get",
+        url: `${ENVS.GITHUB_TOKEN_INFO_URL}`,
+        headers: {
+          Authorization: "token " + access_token,
+        },
+      });
+
+      const userData: {
+        email: string;
+        name: string;
+        avatar_url: string;
+      } = (await token_info_response.data) as any;
+
+      if (!userData.email) {
+        return { error: "Github email should be made public" };
+      }
+
+      const user = await this.db.oneOrNone(
+        `SELECT * FROM users WHERE email = $1`,
+        [userData.email]
+      );
+
+      const userName = userData.name.split(" ");
+
+      if (!user) {
+        const ID = GenericHelper.generateId(11);
+        await this.db.none(
+          `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
+          UPDATE user_states SET email = $2 WHERE state = $7;
+          `,
+          [
+            ID,
+            userData.email,
+            userName[0],
+            userName[1],
+            userData.avatar_url,
+            true,
+            state,
+          ]
+        );
+      }
+
+      // Information in userData
+      // 1. email
+      // 2. name
+      // 3. avatar_url
+
+      // Create user with ID and store the necessary information
+      this._logger.info(`User data - ${JSON.stringify(userData)}`);
+      return userData;
+    } catch (error) {
+      throw error;
+    }
+  };
 
   initiateGoogleOAuth = async (state: string): Promise<string> => {
     const GOOGLE_OAUTH_SCOPES = [
@@ -44,6 +146,7 @@ class OauthService implements IOauthService {
 
       const data = {
         code,
+        state,
         client_id: ENVS.GOOGLE_CLIENT_ID,
         client_secret: ENVS.GOOGLE_CLIENT_SECRET,
         redirect_uri: ENVS.GOOGLE_REDIRECT_URL,
@@ -102,7 +205,7 @@ class OauthService implements IOauthService {
       throw error;
     }
   };
-  
+
   initiateFacebookOAuth = async (state: string): Promise<string> => {
     try {
       this._logger.info(
@@ -130,9 +233,12 @@ class OauthService implements IOauthService {
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
 
-      const response = await fetch(`${ENVS.FACEBOOK_ACCESS_TOKEN_URL}?client_id=${ENVS.FACEBOOK_CLIENT_ID}&redirect_uri=${ENVS.FACEBOOK_REDIRECT_URL}&client_secret=${ENVS.FACEBOOK_CLIENT_SECRET}&code=${code}` as string, {
-        method: "GET"
-      });
+      const response = await fetch(
+        `${ENVS.FACEBOOK_ACCESS_TOKEN_URL}?client_id=${ENVS.FACEBOOK_CLIENT_ID}&redirect_uri=${ENVS.FACEBOOK_REDIRECT_URL}&client_secret=${ENVS.FACEBOOK_CLIENT_SECRET}&code=${code}` as string,
+        {
+          method: "GET",
+        }
+      );
 
       const access_token_data = await response.json();
 

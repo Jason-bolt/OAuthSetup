@@ -12,6 +12,65 @@ class OauthController implements IOauthController {
     private _logger: typeof logger
   ) {}
 
+  initiateGithubOAuth = async (
+    req: Request,
+    res: Response
+  ): Promise<object> => {
+    try {
+      this._logger.info(
+        "---------- OAUTHCONTROLLER ----------: Initiating Github OAuth"
+      );
+      const response = new ResponseHandler(req, res);
+
+      const state = req.query?.state as string;
+      if (!state) {
+        return response.fail({
+          code: StatusCodes.NOT_FOUND,
+          message: "State is required",
+          data: null,
+        });
+      }
+      const githubInitiationLink =
+        await this.oauthService.initiateGithubOAuth(state);
+      return response.success({
+        message: "Github OAuth link generated successfully",
+        data: githubInitiationLink,
+      });
+    } catch (error: any) {
+      this._logger.info("An error occured in OauthController", error?.message);
+      throw error;
+    }
+  };
+  githubOAuthCallback = async (
+    req: Request,
+    res: Response
+  ): Promise<object> => {
+    try {
+      this._logger.info(
+        "---------- OAUTHCONTROLLER ----------: Completing Github OAuth"
+      );
+      const response = new ResponseHandler(req, res);
+      const query = req.query;
+      const githubTokenData: any =
+        await this.oauthService.githubOAuthCallback(query);
+
+      if (githubTokenData?.error) {
+        return response.fail({
+          message: githubTokenData?.error,
+          data: null,
+          code: StatusCodes.NOT_FOUND,
+        });
+      }
+      return response.success({
+        message: "Signed in with Github successfully",
+        data: githubTokenData,
+      });
+    } catch (error: any) {
+      this._logger.info("An error occured in OauthController", error?.message);
+      throw error;
+    }
+  };
+
   initiateGoogleOAuth = async (
     req: Request,
     res: Response
@@ -63,7 +122,7 @@ class OauthController implements IOauthController {
       throw error;
     }
   };
-  
+
   initiateFacebookOAuth = async (
     req: Request,
     res: Response
