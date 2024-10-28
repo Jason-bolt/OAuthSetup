@@ -13,6 +13,9 @@ router.get("/google/callback", tryCatch(oauthController.googleOAuthCallback));
 router.get("/github", tryCatch(oauthController.initiateGithubOAuth));
 router.get("/github/callback", tryCatch(oauthController.githubOAuthCallback));
 router.get("/facebook", tryCatch(oauthController.initiateFacebookOAuth));
-router.get("/facebook/callback", tryCatch(oauthController.facebookOAuthCallback));
+router.get(
+  "/facebook/callback",
+  tryCatch(oauthController.facebookOAuthCallback),
+);
 
 export default router;

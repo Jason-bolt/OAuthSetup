@@ -12,7 +12,7 @@ export class GenericHelper {
   static calcPages(total: number, limit: number): number {
     const displayPage = Math.floor(total / limit);
     return total % limit ? displayPage + 1 : displayPage;
-}
+  }
 
   static async paginatedData(
     resourceQuery: string,

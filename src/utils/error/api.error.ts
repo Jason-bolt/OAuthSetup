@@ -75,7 +75,7 @@ export class ApiError extends Error {
     err: any,
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     const message = "An error occurred, we are looking into it.";
     const status = "error";

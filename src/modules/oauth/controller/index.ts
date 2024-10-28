@@ -9,16 +9,16 @@ import { StatusCodes } from "http-status-codes";
 class OauthController implements IOauthController {
   constructor(
     private oauthService: IOauthService,
-    private _logger: typeof logger
+    private _logger: typeof logger,
   ) {}
 
   initiateGithubOAuth = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Github OAuth"
+        "---------- OAUTHCONTROLLER ----------: Initiating Github OAuth",
       );
       const response = new ResponseHandler(req, res);
 
@@ -43,11 +43,11 @@ class OauthController implements IOauthController {
   };
   githubOAuthCallback = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Github OAuth"
+        "---------- OAUTHCONTROLLER ----------: Completing Github OAuth",
       );
       const response = new ResponseHandler(req, res);
       const query = req.query;
@@ -73,11 +73,11 @@ class OauthController implements IOauthController {
 
   initiateGoogleOAuth = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Google OAuth"
+        "---------- OAUTHCONTROLLER ----------: Initiating Google OAuth",
       );
       const response = new ResponseHandler(req, res);
 
@@ -103,11 +103,11 @@ class OauthController implements IOauthController {
 
   googleOAuthCallback = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Google OAuth"
+        "---------- OAUTHCONTROLLER ----------: Completing Google OAuth",
       );
       const response = new ResponseHandler(req, res);
       const query = req.query;
@@ -125,11 +125,11 @@ class OauthController implements IOauthController {
 
   initiateFacebookOAuth = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Facebook OAuth"
+        "---------- OAUTHCONTROLLER ----------: Initiating Facebook OAuth",
       );
       const response = new ResponseHandler(req, res);
       const state = req.query.state as string;
@@ -147,11 +147,11 @@ class OauthController implements IOauthController {
 
   facebookOAuthCallback = async (
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Facebook OAuth"
+        "---------- OAUTHCONTROLLER ----------: Completing Facebook OAuth",
       );
       const response = new ResponseHandler(req, res);
       const query = req.query;

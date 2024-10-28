@@ -11,9 +11,9 @@ export const tryCatch =
       next: NextFunction,
     ) => Promise<any>,
   ) =>
-    (req: Request, res: Response, next: NextFunction) => {
-      controller(req, res, next).catch((error) => {
-        console.error(error);
-        return next(error);
-      });
-    };
+  (req: Request, res: Response, next: NextFunction) => {
+    controller(req, res, next).catch((error) => {
+      console.error(error);
+      return next(error);
+    });
+  };

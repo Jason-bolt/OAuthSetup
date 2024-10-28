@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
 interface IENVS {
@@ -56,6 +56,6 @@ const ENVS: IENVS = {
   GITHUB_REDIRECT_URL: process.env.GITHUB_REDIRECT_URL,
   GITHUB_ACCESS_TOKEN_URL: process.env.GITHUB_ACCESS_TOKEN_URL,
   GITHUB_TOKEN_INFO_URL: process.env.GITHUB_TOKEN_INFO_URL,
-}
+};
 
 export default ENVS;
