@@ -26,6 +26,12 @@ interface IENVS {
   GITHUB_REDIRECT_URL: string | undefined;
   GITHUB_ACCESS_TOKEN_URL: string | undefined;
   GITHUB_TOKEN_INFO_URL: string | undefined;
+  EMAIL_HOST: string | undefined;
+  EMAIL_PORT: string | undefined;
+  EMAIL_AUTH_USER: string | undefined;
+  EMAIL_AUTH_PASSWORD: string | undefined;
+  EMAIL_FROM: string | undefined;
+  MAILGUN_API_KEY: string | undefined;
 }
 
 const ENVS: IENVS = {
@@ -56,6 +62,14 @@ const ENVS: IENVS = {
   GITHUB_REDIRECT_URL: process.env.GITHUB_REDIRECT_URL,
   GITHUB_ACCESS_TOKEN_URL: process.env.GITHUB_ACCESS_TOKEN_URL,
   GITHUB_TOKEN_INFO_URL: process.env.GITHUB_TOKEN_INFO_URL,
+  // EMAIL CONFIG
+  EMAIL_HOST: process.env.EMAIL_HOST,
+  EMAIL_PORT: process.env.EMAIL_PORT,
+  EMAIL_AUTH_USER: process.env.EMAIL_AUTH_USER,
+  EMAIL_AUTH_PASSWORD: process.env.EMAIL_AUTH_PASSWORD,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+  // MAILGUN CONFIG
+  MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
 };
 
 export default ENVS;

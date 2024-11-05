@@ -1,6 +1,7 @@
 CREATE TABLE users (
-  id VARCHAR(11) PRIMARY KEY,
+  id VARCHAR(14) PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255),
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   image_url VARCHAR(255) NOT NULL,

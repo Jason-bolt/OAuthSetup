@@ -71,7 +71,13 @@ export class ApiError extends Error {
     }
   }
 
-  static genericError = (err: any, req: Request, res: Response) => {
+  static genericError = (
+    err: any,
+    req: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next: NextFunction,
+  ) => {
     const message = "An error occurred, we are looking into it.";
     const status = "error";
     const url = req.originalUrl;
