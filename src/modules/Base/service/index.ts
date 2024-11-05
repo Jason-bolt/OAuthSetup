@@ -11,12 +11,11 @@ class BaseService implements IBaseService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger,
-    private emailHelper: EmailHelper
+    private emailHelper: EmailHelper,
   ) {}
   something(): Promise<string> {
     throw new Error("Method not implemented.");
   }
-  
 }
 
 const emailHelper = new EmailHelper();

@@ -59,7 +59,7 @@ export default class EmailHelper {
         to: [to],
         subject: subject,
         html: html,
-      }
+      },
     );
     // await EmailHelper._transporter.sendMail({
     //   from: ENVS.EMAIL_FROM, // sender address

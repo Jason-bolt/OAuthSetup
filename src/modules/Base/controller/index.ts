@@ -11,7 +11,7 @@ import { StatusCodes } from "http-status-codes";
 class BaseController implements IbaseController {
   constructor(
     private authService: IBaseService,
-    private _logger: typeof logger
+    private _logger: typeof logger,
   ) {}
   something(req: Request, res: Response): Promise<object> {
     throw new Error("Method not implemented.");
