@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import IOauthController from "./Icontroller";
-import IOauthService from "../service/Iservice";
+import IauthController from "./Icontroller";
+import IAuthService from "../service/Iservice";
 import logger from "../../../config/logger";
-import oauthService from "../service";
+import authService from "../service";
 import ResponseHandler from "../../../utils/helpers/response.handler";
 import { StatusCodes } from "http-status-codes";
 
-class OauthController implements IOauthController {
+class AuthController implements IauthController {
   constructor(
-    private oauthService: IOauthService,
+    private authService: IAuthService,
     private _logger: typeof logger,
   ) {}
 
@@ -18,7 +18,7 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Github OAuth",
+        "---------- AUTH CONTROLLER ----------: Initiating Github OAuth",
       );
       const response = new ResponseHandler(req, res);
 
@@ -31,13 +31,13 @@ class OauthController implements IOauthController {
         });
       }
       const githubInitiationLink =
-        await this.oauthService.initiateGithubOAuth(state);
+        await this.authService.initiateGithubOAuth(state);
       return response.success({
         message: "Github OAuth link generated successfully",
         data: githubInitiationLink,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
@@ -47,12 +47,12 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Github OAuth",
+        "---------- AUTH CONTROLLER ----------: Completing Github OAuth",
       );
       const response = new ResponseHandler(req, res);
-      const query = req.query;
+      const query = req.query as unknown as { code: string; state: string };
       const githubTokenData: any =
-        await this.oauthService.githubOAuthCallback(query);
+        await this.authService.githubOAuthCallback(query);
 
       if (githubTokenData?.error) {
         return response.fail({
@@ -66,7 +66,7 @@ class OauthController implements IOauthController {
         data: githubTokenData,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
@@ -77,7 +77,7 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Google OAuth",
+        "---------- AUTH CONTROLLER ----------: Initiating Google OAuth",
       );
       const response = new ResponseHandler(req, res);
 
@@ -90,13 +90,13 @@ class OauthController implements IOauthController {
         });
       }
       const googleInitiationLink =
-        await this.oauthService.initiateGoogleOAuth(state);
+        await this.authService.initiateGoogleOAuth(state);
       return response.success({
         message: "Google OAuth link generated successfully",
         data: googleInitiationLink,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
@@ -107,18 +107,17 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Google OAuth",
+        "---------- AUTH CONTROLLER ----------: Completing Google OAuth",
       );
       const response = new ResponseHandler(req, res);
-      const query = req.query;
-      const googleTokenData =
-        await this.oauthService.googleOAuthCallback(query);
+      const query = req.query as unknown as { code: string; state: string };
+      const googleTokenData = await this.authService.googleOAuthCallback(query);
       return response.success({
         message: "Signed in with Google successfully",
         data: googleTokenData,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
@@ -129,18 +128,18 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Initiating Facebook OAuth",
+        "---------- AUTH CONTROLLER ----------: Initiating Facebook OAuth",
       );
       const response = new ResponseHandler(req, res);
       const state = req.query.state as string;
       const facebookInitiationLink =
-        await this.oauthService.initiateFacebookOAuth(state);
+        await this.authService.initiateFacebookOAuth(state);
       return response.success({
         message: "Facebook OAuth link generated successfully",
         data: facebookInitiationLink,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
@@ -151,23 +150,23 @@ class OauthController implements IOauthController {
   ): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHCONTROLLER ----------: Completing Facebook OAuth",
+        "---------- AUTH CONTROLLER ----------: Completing Facebook OAuth",
       );
       const response = new ResponseHandler(req, res);
-      const query = req.query;
+      const query = req.query as unknown as { code: string; state: string };
       const facebookTokenData =
-        await this.oauthService.facebookOAuthCallback(query);
+        await this.authService.facebookOAuthCallback(query);
       return response.success({
         message: "Signed in with Facebook successfully",
         data: facebookTokenData,
       });
     } catch (error: any) {
-      this._logger.info("An error occured in OauthController", error?.message);
+      this._logger.info("An error occured in AuthController", error?.message);
       throw error;
     }
   };
 }
 
-const oauthController = new OauthController(oauthService, logger);
+const authController = new AuthController(authService, logger);
 
-export default oauthController;
+export default authController;

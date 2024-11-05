@@ -1,11 +1,11 @@
-import IOauthService from "./Iservice";
+import IAuthService from "./Iservice";
 import db, { DatabaseType } from "../../../config/database";
 import logger from "../../../config/logger";
 import ENVS from "../../../config/envs";
 import { GenericHelper } from "../../../utils/helpers/generic.helpers";
 import axios from "axios";
 
-class OauthService implements IOauthService {
+class AuthService implements IAuthService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger,
@@ -14,7 +14,7 @@ class OauthService implements IOauthService {
     const GITHUB_OAUTH_SCOPES = ["read:user", "user:email"];
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Initiating Github OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Github OAuth",
       );
 
       // Save state to database to be called by the get user by state
@@ -31,21 +31,16 @@ class OauthService implements IOauthService {
     }
   };
 
-  githubOAuthCallback = async (query: any): Promise<object> => {
+  githubOAuthCallback = async (query: {
+    code: string;
+    state: string;
+  }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Github OAuth callback",
+        "---------- AUTH SERVICE ----------: Github OAuth callback",
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
-
-      const data = {
-        code,
-        state,
-        client_id: ENVS.GITHUB_CLIENT_ID,
-        client_secret: ENVS.GITHUB_CLIENT_SECRET,
-        redirect_uri: ENVS.GITHUB_REDIRECT_URL,
-      };
 
       const response = await axios({
         method: "post",
@@ -68,7 +63,11 @@ class OauthService implements IOauthService {
         email: string;
         name: string;
         avatar_url: string;
-      } = (await token_info_response.data) as any;
+      } = (await token_info_response.data) as {
+        email: string;
+        name: string;
+        avatar_url: string;
+      };
 
       if (!userData.email) {
         return { error: "Github email should be made public" };
@@ -119,7 +118,7 @@ class OauthService implements IOauthService {
     ];
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Initiating Google OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Google OAuth",
       );
 
       // Save state to database to be called by the get user by state
@@ -136,10 +135,13 @@ class OauthService implements IOauthService {
     }
   };
 
-  googleOAuthCallback = async (query: any): Promise<object> => {
+  googleOAuthCallback = async (query: {
+    code: string;
+    state: string;
+  }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Google OAuth callback",
+        "---------- AUTH SERVICE ----------: Google OAuth callback",
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
@@ -209,7 +211,7 @@ class OauthService implements IOauthService {
   initiateFacebookOAuth = async (state: string): Promise<string> => {
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Initiating Facebook OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Facebook OAuth",
       );
 
       // Save state to database to be called by the get user by state
@@ -225,10 +227,13 @@ class OauthService implements IOauthService {
     }
   };
 
-  facebookOAuthCallback = async (query: any): Promise<object> => {
+  facebookOAuthCallback = async (query: {
+    code: string;
+    state: string;
+  }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- OAUTHSERVICE ----------: Facebook OAuth callback",
+        "---------- AUTH SERVICE ----------: Facebook OAuth callback",
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
@@ -290,6 +295,6 @@ class OauthService implements IOauthService {
   };
 }
 
-const oauthService = new OauthService(db, logger);
+const oauthService = new AuthService(db, logger);
 
 export default oauthService;
