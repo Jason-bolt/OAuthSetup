@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import IauthController from "./Icontroller";
 import IAuthService from "../service/Iservice";

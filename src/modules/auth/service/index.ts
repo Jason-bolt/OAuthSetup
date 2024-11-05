@@ -1,27 +1,28 @@
+/* eslint-disable no-useless-catch */
 import IAuthService from "./Iservice";
 import db, { DatabaseType } from "../../../config/database";
 import logger from "../../../config/logger";
 import ENVS from "../../../config/envs";
 import { GenericHelper } from "../../../utils/helpers/generic.helpers";
 import axios from "axios";
+import EmailHelper from "../../../utils/helpers/Email/email.helpers";
+import authQueries from "../queries";
 
 class AuthService implements IAuthService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger,
+    private emailHelper: EmailHelper
   ) {}
   initiateGithubOAuth = async (state: string): Promise<string> => {
     const GITHUB_OAUTH_SCOPES = ["read:user", "user:email"];
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Initiating Github OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Github OAuth"
       );
 
       // Save state to database to be called by the get user by state
-      await this.db.none(
-        "INSERT INTO user_states (state, provider) VALUES ($1, $2)",
-        [state, "github"],
-      );
+      await this.db.none(authQueries.insertProviderAndState, [state, "github"]);
 
       const scopes = GITHUB_OAUTH_SCOPES.join(" ");
       const GITHUB_OAUTH_CONSENT_SCREEN_URL = `${ENVS.GITHUB_OAUTH_URL}?client_id=${ENVS.GITHUB_CLIENT_ID}&redirect_uri=${ENVS.GITHUB_REDIRECT_URL}&state=${state}&scope=${scopes}`;
@@ -37,7 +38,7 @@ class AuthService implements IAuthService {
   }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Github OAuth callback",
+        "---------- AUTH SERVICE ----------: Github OAuth callback"
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
@@ -50,7 +51,7 @@ class AuthService implements IAuthService {
         },
       });
 
-      const { access_token } = response.data as any;
+      const { access_token } = response.data as { access_token: string };
       const token_info_response = await axios({
         method: "get",
         url: `${ENVS.GITHUB_TOKEN_INFO_URL}`,
@@ -70,18 +71,19 @@ class AuthService implements IAuthService {
       };
 
       if (!userData.email) {
+        await this.db.none(authQueries.deleteFromUserState, [state, "github"]);
         return { error: "Github email should be made public" };
       }
 
       const user = await this.db.oneOrNone(
         `SELECT * FROM users WHERE email = $1`,
-        [userData.email],
+        [userData.email]
       );
 
       const userName = userData.name.split(" ");
 
       if (!user) {
-        const ID = GenericHelper.generateId(11);
+        const ID = GenericHelper.generateId(11, "AP");
         await this.db.none(
           `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
           UPDATE user_states SET email = $2 WHERE state = $7;
@@ -94,9 +96,15 @@ class AuthService implements IAuthService {
             userData.avatar_url,
             true,
             state,
-          ],
+          ]
         );
       }
+
+      this.emailHelper.sendRegisterEmail({
+        email: userData.email,
+        firstName: userName[0],
+        lastName: userName[1],
+      });
 
       // Information in userData
       // 1. email
@@ -118,14 +126,11 @@ class AuthService implements IAuthService {
     ];
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Initiating Google OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Google OAuth"
       );
 
       // Save state to database to be called by the get user by state
-      await this.db.none(
-        "INSERT INTO user_states (state, provider) VALUES ($1, $2)",
-        [state, "google"],
-      );
+      await this.db.none(authQueries.insertProviderAndState, [state, "google"]);
 
       const scopes = GOOGLE_OAUTH_SCOPES.join(" ");
       const GOOGLE_OAUTH_CONSENT_SCREEN_URL = `${ENVS.GOOGLE_OAUTH_URL}?client_id=${ENVS.GOOGLE_CLIENT_ID}&redirect_uri=${ENVS.GOOGLE_REDIRECT_URL}&access_type=offline&response_type=code&state=${state}&scope=${scopes}&prompt=consent`;
@@ -141,7 +146,7 @@ class AuthService implements IAuthService {
   }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Google OAuth callback",
+        "---------- AUTH SERVICE ----------: Google OAuth callback"
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
@@ -164,18 +169,18 @@ class AuthService implements IAuthService {
 
       const { id_token } = access_token_data;
       const token_info_response = await fetch(
-        `${ENVS.GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`,
+        `${ENVS.GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`
       );
 
       const userData = await token_info_response.json();
 
       const user = await this.db.oneOrNone(
         `SELECT * FROM users WHERE email = $1`,
-        [userData.email],
+        [userData.email]
       );
 
       if (!user) {
-        const ID = GenericHelper.generateId(11);
+        const ID = GenericHelper.generateId(11, "AP");
         await this.db.none(
           `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
           UPDATE user_states SET email = $2 WHERE state = $7;
@@ -188,9 +193,17 @@ class AuthService implements IAuthService {
             userData.picture,
             true,
             state,
-          ],
+          ]
         );
       }
+
+      this.emailHelper.sendRegisterEmail({
+        email: userData.email,
+        firstName: userData.given_name,
+        lastName: userData.family_name,
+      });
+
+      await this.db.none(authQueries.deleteFromUserState, [state, "google"]);
 
       // Information in userData
       // 1. email
@@ -211,14 +224,14 @@ class AuthService implements IAuthService {
   initiateFacebookOAuth = async (state: string): Promise<string> => {
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Initiating Facebook OAuth",
+        "---------- AUTH SERVICE ----------: Initiating Facebook OAuth"
       );
 
       // Save state to database to be called by the get user by state
-      await this.db.none(
-        "INSERT INTO user_states (state, provider) VALUES ($1, $2)",
-        [state, "facebook"],
-      );
+      await this.db.none(authQueries.insertProviderAndState, [
+        state,
+        "facebook",
+      ]);
 
       const FACEBOOK_OAUTH_CONSENT_SCREEN_URL = `${ENVS.FACEBOOK_OAUTH_URL}?client_id=${ENVS.FACEBOOK_CLIENT_ID}&redirect_uri=${ENVS.FACEBOOK_REDIRECT_URL}&state=${state}&scope=email&auth_type=reauthenticate`;
       return FACEBOOK_OAUTH_CONSENT_SCREEN_URL;
@@ -233,7 +246,7 @@ class AuthService implements IAuthService {
   }): Promise<object> => {
     try {
       this._logger.info(
-        "---------- AUTH SERVICE ----------: Facebook OAuth callback",
+        "---------- AUTH SERVICE ----------: Facebook OAuth callback"
       );
       const { code, state } = query;
       this._logger.info(`Code passed - ${code}`);
@@ -242,14 +255,14 @@ class AuthService implements IAuthService {
         `${ENVS.FACEBOOK_ACCESS_TOKEN_URL}?client_id=${ENVS.FACEBOOK_CLIENT_ID}&redirect_uri=${ENVS.FACEBOOK_REDIRECT_URL}&client_secret=${ENVS.FACEBOOK_CLIENT_SECRET}&code=${code}` as string,
         {
           method: "GET",
-        },
+        }
       );
 
       const access_token_data = await response.json();
 
       const { access_token } = access_token_data;
       const token_info_response = await fetch(
-        `${ENVS.FACEBOOK_TOKEN_INFO_URL}?access_token=${access_token}&fields=name,email,picture`,
+        `${ENVS.FACEBOOK_TOKEN_INFO_URL}?access_token=${access_token}&fields=name,email,picture`
       );
 
       const userData = await token_info_response.json();
@@ -259,11 +272,11 @@ class AuthService implements IAuthService {
 
       const user = await this.db.oneOrNone(
         `SELECT * FROM users WHERE email = $1`,
-        [userData.email],
+        [userData.email]
       );
 
       if (!user) {
-        const ID = GenericHelper.generateId(11);
+        const ID = GenericHelper.generateId(11, "AP");
         await this.db.none(
           `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
           UPDATE user_states SET email = $2 WHERE state = $7;
@@ -276,9 +289,11 @@ class AuthService implements IAuthService {
             userData.picture?.data?.url,
             true,
             state,
-          ],
+          ]
         );
       }
+
+      await this.db.none(authQueries.deleteFromUserState, [state, "facebook"]);
 
       // Information in userData
       // 1. email
@@ -295,6 +310,8 @@ class AuthService implements IAuthService {
   };
 }
 
-const oauthService = new AuthService(db, logger);
+const emailHelper = new EmailHelper();
+emailHelper.init();
+const oauthService = new AuthService(db, logger, emailHelper);
 
 export default oauthService;

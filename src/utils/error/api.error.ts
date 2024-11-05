@@ -39,7 +39,7 @@ export class ApiError extends Error {
 
       const errorMessage: string[] = JSON.parse(message).map(
         (error: { message: string; path: string }) =>
-          `${error.path}: ${error.message} \n`,
+          `${error.path}: ${error.message} \n`
       );
 
       return res.status(code).json({
@@ -71,7 +71,13 @@ export class ApiError extends Error {
     }
   }
 
-  static genericError = (err: any, req: Request, res: Response) => {
+  static genericError = (
+    err: any,
+    req: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next: NextFunction
+  ) => {
     const message = "An error occurred, we are looking into it.";
     const status = "error";
     const url = req.originalUrl;
