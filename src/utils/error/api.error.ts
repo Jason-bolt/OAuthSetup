@@ -71,12 +71,7 @@ export class ApiError extends Error {
     }
   }
 
-  static genericError = (
-    err: any,
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  static genericError = (err: any, req: Request, res: Response) => {
     const message = "An error occurred, we are looking into it.";
     const status = "error";
     const url = req.originalUrl;

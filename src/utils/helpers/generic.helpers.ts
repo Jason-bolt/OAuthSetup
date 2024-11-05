@@ -19,8 +19,9 @@ export class GenericHelper {
     countQuery: string,
     page: number,
     limit: number,
-    queryParams: any,
+    queryParams: Record<string, string | number>,
   ): Promise<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any[];
     currentPage: number;
     totalCount: number;

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-interface IAdminController {
+interface IAuthController {
   initiateGoogleOAuth(req: Request, res: Response): Promise<object>;
   googleOAuthCallback(req: Request, res: Response): Promise<object>;
   initiateFacebookOAuth(req: Request, res: Response): Promise<object>;
@@ -9,4 +9,4 @@ interface IAdminController {
   githubOAuthCallback(req: Request, res: Response): Promise<object>;
 }
 
-export default IAdminController;
+export default IAuthController;
