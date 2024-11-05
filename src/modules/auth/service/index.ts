@@ -7,6 +7,7 @@ import { GenericHelper } from "../../../utils/helpers/generic.helpers";
 import axios from "axios";
 import EmailHelper from "../../../utils/helpers/Email/email.helpers";
 import authQueries from "../queries";
+import userQueries from "../../User/queries";
 
 class AuthService implements IAuthService {
   constructor(
@@ -75,29 +76,23 @@ class AuthService implements IAuthService {
         return { error: "Github email should be made public" };
       }
 
-      const user = await this.db.oneOrNone(
-        `SELECT * FROM users WHERE email = $1`,
-        [userData.email]
-      );
+      const user = await this.db.oneOrNone(userQueries.getUserByEmail, [
+        userData.email,
+      ]);
 
       const userName = userData.name.split(" ");
 
       if (!user) {
         const ID = GenericHelper.generateId(11, "AP");
-        await this.db.none(
-          `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
-          UPDATE user_states SET email = $2 WHERE state = $7;
-          `,
-          [
-            ID,
-            userData.email,
-            userName[0],
-            userName[1],
-            userData.avatar_url,
-            true,
-            state,
-          ]
-        );
+        await this.db.none(userQueries.createOauthUser, [
+          ID,
+          userData.email,
+          userName[0],
+          userName[1],
+          userData.avatar_url,
+          true,
+          state,
+        ]);
       }
 
       this.emailHelper.sendRegisterEmail({
@@ -174,27 +169,21 @@ class AuthService implements IAuthService {
 
       const userData = await token_info_response.json();
 
-      const user = await this.db.oneOrNone(
-        `SELECT * FROM users WHERE email = $1`,
-        [userData.email]
-      );
+      const user = await this.db.oneOrNone(userQueries.getUserByEmail, [
+        userData.email,
+      ]);
 
       if (!user) {
         const ID = GenericHelper.generateId(11, "AP");
-        await this.db.none(
-          `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
-          UPDATE user_states SET email = $2 WHERE state = $7;
-          `,
-          [
-            ID,
-            userData.email,
-            userData.given_name,
-            userData.family_name,
-            userData.picture,
-            true,
-            state,
-          ]
-        );
+        await this.db.none(userQueries.createOauthUser, [
+          ID,
+          userData.email,
+          userData.given_name,
+          userData.family_name,
+          userData.picture,
+          true,
+          state,
+        ]);
       }
 
       this.emailHelper.sendRegisterEmail({
@@ -270,27 +259,21 @@ class AuthService implements IAuthService {
 
       const userName = userData.name.split(" ");
 
-      const user = await this.db.oneOrNone(
-        `SELECT * FROM users WHERE email = $1`,
-        [userData.email]
-      );
+      const user = await this.db.oneOrNone(userQueries.getUserByEmail, [
+        userData.email,
+      ]);
 
       if (!user) {
         const ID = GenericHelper.generateId(11, "AP");
-        await this.db.none(
-          `INSERT INTO users (id, email, first_name, last_name, image_url, email_verified) VALUES ($1, $2, $3, $4, $5, $6);
-          UPDATE user_states SET email = $2 WHERE state = $7;
-          `,
-          [
-            ID,
-            userData.email,
-            userName[0],
-            userName[1],
-            userData.picture?.data?.url,
-            true,
-            state,
-          ]
-        );
+        await this.db.none(userQueries.createOauthUser, [
+          ID,
+          userData.email,
+          userName[0],
+          userName[1],
+          userData.picture?.data?.url,
+          true,
+          state,
+        ]);
       }
 
       await this.db.none(authQueries.deleteFromUserState, [state, "facebook"]);
@@ -312,6 +295,6 @@ class AuthService implements IAuthService {
 
 const emailHelper = new EmailHelper();
 emailHelper.init();
-const oauthService = new AuthService(db, logger, emailHelper);
+const authService = new AuthService(db, logger, emailHelper);
 
-export default oauthService;
+export default authService;
