@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
-import IbaseController from "./Icontroller";
+import IBaseController from "./Icontroller";
 import IBaseService from "../service/Iservice";
 import logger from "../../../config/logger";
 import authService from "../service";
 import ResponseHandler from "../../../utils/helpers/response.handler";
 import { StatusCodes } from "http-status-codes";
 
-class BaseController implements IbaseController {
+class BaseController implements IBaseController {
   constructor(
     private authService: IBaseService,
     private _logger: typeof logger,
@@ -18,6 +18,6 @@ class BaseController implements IbaseController {
   }
 }
 
-const authController = new BaseController(authService, logger);
+const baseController = new BaseController(authService, logger);
 
-export default authController;
+export default baseController;

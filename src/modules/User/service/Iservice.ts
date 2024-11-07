@@ -1,5 +1,6 @@
-interface IBaseService {
-  something(): Promise<string>;
+interface IUserService {
+  getUserById(id: string): Promise<object>;
+  getUserByEmail(email: string): Promise<object>;
 }
 
-export default IBaseService;
+export default IUserService;
