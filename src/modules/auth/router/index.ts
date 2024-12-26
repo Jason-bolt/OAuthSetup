@@ -18,6 +18,15 @@ router.get(
 );
 
 router.post(
+  "/register",
+  authMiddleware.isValidRegisterationBody,
+  authMiddleware.isUniqueEmail,
+  authMiddleware.isUniqueUsername,
+  authMiddleware.isValidRegistrationPassowrd,
+  tryCatch(authController.registerUser),
+);
+
+router.post(
   "/login",
   authMiddleware.isValidEmailAndPassword,
   tryCatch(authController.login),

@@ -265,6 +265,27 @@ class AuthService implements IAuthService {
     return userData;
   };
 
+  registerUser = async ({
+    email,
+    first_name,
+    last_name,
+    username,
+    password,
+  }: {
+    email: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    password: string;
+  }): Promise<IUser> => {
+    this._logger.info("---------- AUTH SERVICE ----------: Registering user");
+
+    const ID = GenericHelper.generateId(11, "AP");
+    const user = await this.db.oneOrNone(userQueries.registerUser, [ID, email, first_name, last_name, username, GenericHelper.hashString(password)]);
+
+    return user;
+  };
+  
   login = async ({ email }: { email: string }): Promise<string> => {
     this._logger.info("---------- AUTH SERVICE ----------: Logging in");
 
