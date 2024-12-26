@@ -96,7 +96,7 @@ export class GenericHelper {
   static hashString(string: string) {
     return bcrypt.hashSync(string, 10);
   }
-  
+
   static compareHash(string: string, hash: string) {
     return bcrypt.compareSync(string, hash);
   }
@@ -108,8 +108,14 @@ export class GenericHelper {
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  
+
     // Return true only if all conditions are met
-    return hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+    return (
+      hasMinLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
   }
 }

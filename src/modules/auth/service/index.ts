@@ -13,12 +13,12 @@ class AuthService implements IAuthService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger,
-    private emailHelper: EmailHelper
+    private emailHelper: EmailHelper,
   ) {}
   initiateGithubOAuth = async (state: string): Promise<string> => {
     const GITHUB_OAUTH_SCOPES = ["read:user", "user:email"];
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Initiating Github OAuth"
+      "---------- AUTH SERVICE ----------: Initiating Github OAuth",
     );
 
     // Save state to database to be called by the get user by state
@@ -34,7 +34,7 @@ class AuthService implements IAuthService {
     state: string;
   }): Promise<object> => {
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Github OAuth callback"
+      "---------- AUTH SERVICE ----------: Github OAuth callback",
     );
     const { code, state } = query;
     this._logger.info(`Code passed - ${code}`);
@@ -112,7 +112,7 @@ class AuthService implements IAuthService {
       "https%3A//www.googleapis.com/auth/userinfo.profile",
     ];
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Initiating Google OAuth"
+      "---------- AUTH SERVICE ----------: Initiating Google OAuth",
     );
 
     // Save state to database to be called by the get user by state
@@ -128,7 +128,7 @@ class AuthService implements IAuthService {
     state: string;
   }): Promise<object> => {
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Google OAuth callback"
+      "---------- AUTH SERVICE ----------: Google OAuth callback",
     );
     const { code, state } = query;
     this._logger.info(`Code passed - ${code}`);
@@ -151,7 +151,7 @@ class AuthService implements IAuthService {
 
     const { id_token } = access_token_data;
     const token_info_response = await fetch(
-      `${ENVS.GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`
+      `${ENVS.GOOGLE_TOKEN_INFO_URL}?id_token=${id_token}`,
     );
 
     const userData = await token_info_response.json();
@@ -196,7 +196,7 @@ class AuthService implements IAuthService {
 
   initiateFacebookOAuth = async (state: string): Promise<string> => {
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Initiating Facebook OAuth"
+      "---------- AUTH SERVICE ----------: Initiating Facebook OAuth",
     );
 
     // Save state to database to be called by the get user by state
@@ -211,7 +211,7 @@ class AuthService implements IAuthService {
     state: string;
   }): Promise<object> => {
     this._logger.info(
-      "---------- AUTH SERVICE ----------: Facebook OAuth callback"
+      "---------- AUTH SERVICE ----------: Facebook OAuth callback",
     );
     const { code, state } = query;
     this._logger.info(`Code passed - ${code}`);
@@ -220,14 +220,14 @@ class AuthService implements IAuthService {
       `${ENVS.FACEBOOK_ACCESS_TOKEN_URL}?client_id=${ENVS.FACEBOOK_CLIENT_ID}&redirect_uri=${ENVS.FACEBOOK_REDIRECT_URL}&client_secret=${ENVS.FACEBOOK_CLIENT_SECRET}&code=${code}` as string,
       {
         method: "GET",
-      }
+      },
     );
 
     const access_token_data = await response.json();
 
     const { access_token } = access_token_data;
     const token_info_response = await fetch(
-      `${ENVS.FACEBOOK_TOKEN_INFO_URL}?access_token=${access_token}&fields=name,email,picture`
+      `${ENVS.FACEBOOK_TOKEN_INFO_URL}?access_token=${access_token}&fields=name,email,picture`,
     );
 
     const userData = await token_info_response.json();
@@ -265,16 +265,10 @@ class AuthService implements IAuthService {
     return userData;
   };
 
-  login = async ({
-    email,
-  }: {
-    email: string;
-  }): Promise<string> => {
+  login = async ({ email }: { email: string }): Promise<string> => {
     this._logger.info("---------- AUTH SERVICE ----------: Logging in");
 
-    const user = await this.db.oneOrNone(userQueries.getUserByEmail, [
-      email,
-    ]);
+    const user = await this.db.oneOrNone(userQueries.getUserByEmail, [email]);
 
     const token = GenericHelper.generateToken(user, "1h");
     return token;

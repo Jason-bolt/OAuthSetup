@@ -11,5 +11,5 @@ INSERT INTO users (
     'John',
     'Doe',
     TRUE,
-    '$2a$12$NDDgp9s6Bdkn4YYyvrhZd.9sBXRDeHRqRa6TambyP826PGvbUDV5S'
+    '$2a$10$k/3iLaIcgWEpTFaIsGTVJu7DuJtUhFYRj0ylajMZrxuRk8vNs667m' -- password
 );

@@ -11,7 +11,7 @@ import { StatusCodes } from "http-status-codes";
 class UserController implements IUserController {
   constructor(
     private userService: IUserService,
-    private _logger: typeof logger
+    private _logger: typeof logger,
   ) {}
   getUserById = async (req: Request, res: Response): Promise<object> => {
     this._logger.info("---------- USER CONTROLLER ----------: getUserById");

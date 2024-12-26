@@ -4,7 +4,6 @@ import chaiHttp from "chai-http";
 import app from "../../../config/express";
 import "mocha";
 import { StatusCodes } from "http-status-codes";
-import oauthService from "../service";
 import db from "../../../config/database";
 
 chai.use(chaiHttp);

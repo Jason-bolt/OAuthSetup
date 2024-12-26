@@ -13,7 +13,7 @@ class UserService implements IUserService {
   constructor(
     private db: DatabaseType,
     private _logger: typeof logger,
-    private emailHelper: EmailHelper
+    private emailHelper: EmailHelper,
   ) {}
   getUserById = async (id: string): Promise<IUser> => {
     this._logger.info("---------- USER SERVICE ----------: getUserById");
@@ -29,7 +29,9 @@ class UserService implements IUserService {
 
   getUserByUsername = async (username: string): Promise<IUser> => {
     this._logger.info("---------- USER SERVICE ----------: getUserByUsername");
-    const user = await this.db.oneOrNone(userQueries.getUserByUsername, [username]);
+    const user = await this.db.oneOrNone(userQueries.getUserByUsername, [
+      username,
+    ]);
     return user;
   };
 }

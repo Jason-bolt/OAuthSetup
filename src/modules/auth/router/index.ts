@@ -30,5 +30,4 @@ router.post(
   tryCatch(authController.resetPassword),
 );
 
-
 export default router;

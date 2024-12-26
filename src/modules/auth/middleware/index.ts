@@ -8,13 +8,13 @@ interface IAuthMiddleware {
   isValidUsernameAndPassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void;
 
   isValidEmailAndPassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void;
 
   checkToken(req: Request, res: Response, next: NextFunction): void;
@@ -22,7 +22,7 @@ interface IAuthMiddleware {
   isOldAndNewPasswordValid(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void;
 }
 
@@ -30,10 +30,10 @@ class AuthMiddleware implements IAuthMiddleware {
   async isValidUsernameAndPassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     logger.info(
-      "---------- AUTH MIDDLEWARE ----------: isValidUsernameAndPassword"
+      "---------- AUTH MIDDLEWARE ----------: isValidUsernameAndPassword",
     );
     const { username, password } = req.body;
     const user = (await userService.getUserByUsername(username)) as unknown as {
@@ -50,10 +50,10 @@ class AuthMiddleware implements IAuthMiddleware {
   async isValidEmailAndPassword(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     logger.info(
-      "---------- AUTH MIDDLEWARE ----------: isValidEmailAndPassword"
+      "---------- AUTH MIDDLEWARE ----------: isValidEmailAndPassword",
     );
     const { email, password } = req.body;
     const user = (await userService.getUserByEmail(email)) as unknown as {
@@ -106,16 +106,16 @@ class AuthMiddleware implements IAuthMiddleware {
   async isOldAndNewPasswordValid(
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     logger.info(
-      "---------- AUTH MIDDLEWARE ----------: isOldAndNewPasswordValid"
+      "---------- AUTH MIDDLEWARE ----------: isOldAndNewPasswordValid",
     );
     const { oldPassword, newPassword, confirmPassword } = req.body;
     const responseHandler = new ResponseHandler(req, res);
     try {
       const user = (await userService.getUserByEmail(
-        req.user?.email as string
+        req.user?.email as string,
       )) as unknown as { password: string };
       if (!GenericHelper.compareHash(oldPassword, user.password)) {
         return responseHandler.fail({
@@ -134,7 +134,7 @@ class AuthMiddleware implements IAuthMiddleware {
 
       console.log(
         "🚀 ~ AuthMiddleware ~ GenericHelper.isValidPassword(newPassword):",
-        GenericHelper.isValidPassword(newPassword)
+        GenericHelper.isValidPassword(newPassword),
       );
       if (!GenericHelper.isValidPassword(newPassword)) {
         return responseHandler.fail({
