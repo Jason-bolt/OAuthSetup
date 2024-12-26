@@ -281,11 +281,18 @@ class AuthService implements IAuthService {
     this._logger.info("---------- AUTH SERVICE ----------: Registering user");
 
     const ID = GenericHelper.generateId(11, "AP");
-    const user = await this.db.oneOrNone(userQueries.registerUser, [ID, email, first_name, last_name, username, GenericHelper.hashString(password)]);
+    const user = await this.db.oneOrNone(userQueries.registerUser, [
+      ID,
+      email,
+      first_name,
+      last_name,
+      username,
+      GenericHelper.hashString(password),
+    ]);
 
     return user;
   };
-  
+
   login = async ({ email }: { email: string }): Promise<string> => {
     this._logger.info("---------- AUTH SERVICE ----------: Logging in");
 

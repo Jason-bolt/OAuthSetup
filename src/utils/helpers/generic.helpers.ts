@@ -25,7 +25,7 @@ export class GenericHelper {
     countQuery: string,
     page: number,
     limit: number,
-    queryParams: Record<string, string | number>
+    queryParams: Record<string, string | number>,
   ): Promise<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any[];
@@ -76,7 +76,7 @@ export class GenericHelper {
 
   static generateToken(
     data: object,
-    expiresIn: string = `${ENVS.TOKEN_EXPIRY}`
+    expiresIn: string = `${ENVS.TOKEN_EXPIRY}`,
   ) {
     return jwt.sign(data, `${ENVS.TOKEN_SECRET}`, {
       expiresIn,
@@ -127,26 +127,30 @@ export class GenericHelper {
   static verifyFields(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestFields: Record<string, any>,
-    fieldDefinitions: Record<string, FieldValidation>
+    fieldDefinitions: Record<string, FieldValidation>,
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-  for (const [field, { type, required }] of Object.entries(fieldDefinitions)) {
-    const value = requestFields[field];
+    for (const [field, { type, required }] of Object.entries(
+      fieldDefinitions,
+    )) {
+      const value = requestFields[field];
 
-    if (required && (value === undefined || value === null)) {
-      errors.push(`Field '${field}' is required but missing.`);
-      continue;
+      if (required && (value === undefined || value === null)) {
+        errors.push(`Field '${field}' is required but missing.`);
+        continue;
+      }
+
+      if (value !== undefined && value !== null && typeof value !== type) {
+        errors.push(
+          `Field '${field}' must be of type '${type}', but got '${typeof value}'.`,
+        );
+      }
     }
 
-    if (value !== undefined && value !== null && typeof value !== type) {
-      errors.push(`Field '${field}' must be of type '${type}', but got '${typeof value}'.`);
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 }

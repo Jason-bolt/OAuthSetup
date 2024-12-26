@@ -173,7 +173,13 @@ class AuthController implements IauthController {
       this._logger.info("---------- AUTH CONTROLLER ----------: register user");
       const response = new ResponseHandler(req, res);
       const { email, first_name, last_name, username, password } = req.body;
-      const user = await this.authService.registerUser({ email, first_name, last_name, username, password });
+      const user = await this.authService.registerUser({
+        email,
+        first_name,
+        last_name,
+        username,
+        password,
+      });
       return response.success({
         message: "User registered successfully",
         data: user,
@@ -183,7 +189,7 @@ class AuthController implements IauthController {
       throw error;
     }
   };
-  
+
   login = async (req: Request, res: Response): Promise<object> => {
     try {
       this._logger.info("---------- AUTH CONTROLLER ----------: Logging in");
