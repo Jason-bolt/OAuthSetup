@@ -7,6 +7,7 @@ import axios from "axios";
 import EmailHelper from "../../../utils/helpers/Email/email.helpers";
 import authQueries from "../queries";
 import userQueries from "../../User/queries";
+import { IUser } from "../../../config/models/User";
 
 class AuthService implements IAuthService {
   constructor(
@@ -262,6 +263,38 @@ class AuthService implements IAuthService {
     // Create user with ID and store the necessary information
     this._logger.info(`User data - ${JSON.stringify(userData)}`);
     return userData;
+  };
+
+  login = async ({
+    email,
+  }: {
+    email: string;
+  }): Promise<string> => {
+    this._logger.info("---------- AUTH SERVICE ----------: Logging in");
+
+    const user = await this.db.oneOrNone(userQueries.getUserByEmail, [
+      email,
+    ]);
+
+    const token = GenericHelper.generateToken(user, "1h");
+    return token;
+  };
+
+  resetPassword = async ({
+    newPassword,
+    user,
+  }: {
+    newPassword: string;
+    user: IUser;
+  }): Promise<string> => {
+    this._logger.info("---------- AUTH SERVICE ----------: Reset password");
+
+    await this.db.none(userQueries.updatePassword, [
+      GenericHelper.hashString(newPassword),
+      user.id,
+    ]);
+    const token = GenericHelper.generateToken(user, "1h");
+    return token;
   };
 }
 

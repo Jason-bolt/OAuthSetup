@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authController from "../controller";
 import { tryCatch } from "../../../utils/error/try.catch.helper";
+import authMiddleware from "../middleware";
 
 const router = Router();
 
@@ -15,5 +16,19 @@ router.get(
   "/facebook/callback",
   tryCatch(authController.facebookOAuthCallback),
 );
+
+router.post(
+  "/login",
+  authMiddleware.isValidEmailAndPassword,
+  tryCatch(authController.login),
+);
+
+router.post(
+  "/reset-password",
+  tryCatch(authMiddleware.checkToken),
+  tryCatch(authMiddleware.isOldAndNewPasswordValid),
+  tryCatch(authController.resetPassword),
+);
+
 
 export default router;

@@ -7,6 +7,7 @@ import ENVS from "../../../config/envs";
 import { GenericHelper } from "../../../utils/helpers/generic.helpers";
 import EmailHelper from "../../../utils/helpers/Email/email.helpers";
 import userQueries from "../queries";
+import { IUser } from "../../../config/models/User";
 
 class UserService implements IUserService {
   constructor(
@@ -14,7 +15,7 @@ class UserService implements IUserService {
     private _logger: typeof logger,
     private emailHelper: EmailHelper
   ) {}
-  getUserById = async (id: string): Promise<object> => {
+  getUserById = async (id: string): Promise<IUser> => {
     this._logger.info("---------- USER SERVICE ----------: getUserById");
     const user = await this.db.oneOrNone(userQueries.getUserById, [id]);
     return user;
@@ -23,6 +24,12 @@ class UserService implements IUserService {
   getUserByEmail = async (email: string): Promise<object> => {
     this._logger.info("---------- USER SERVICE ----------: getUserByEmail");
     const user = await this.db.oneOrNone(userQueries.getUserByEmail, [email]);
+    return user;
+  };
+
+  getUserByUsername = async (username: string): Promise<IUser> => {
+    this._logger.info("---------- USER SERVICE ----------: getUserByUsername");
+    const user = await this.db.oneOrNone(userQueries.getUserByUsername, [username]);
     return user;
   };
 }
