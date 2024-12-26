@@ -11,6 +11,22 @@ interface IAuthMiddleware {
     next: NextFunction,
   ): void;
 
+  isValidRegisterationBody(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): void;
+
+  isUniqueEmail(req: Request, res: Response, next: NextFunction): void;
+
+  isUniqueUsername(req: Request, res: Response, next: NextFunction): void;
+
+  isValidRegistrationPassowrd(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): void;
+
   isValidEmailAndPassword(
     req: Request,
     res: Response,
@@ -27,6 +43,132 @@ interface IAuthMiddleware {
 }
 
 class AuthMiddleware implements IAuthMiddleware {
+  async isValidRegisterationBody(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    logger.info(
+      "---------- AUTH MIDDLEWARE ----------: isValidRegisterationBody",
+    );
+    const responseHandler = new ResponseHandler(req, res);
+    const {
+      email,
+      username,
+      password,
+      confirmPassword,
+      first_name,
+      last_name,
+    } = req.body;
+    const isValidFields = GenericHelper.verifyFields(
+      {
+        email,
+        username,
+        password,
+        confirmPassword,
+        first_name,
+        last_name,
+      },
+      {
+        email: { type: "string", required: true },
+        username: { type: "string", required: true },
+        password: { type: "string", required: true },
+        confirmPassword: { type: "string", required: true },
+        first_name: { type: "string", required: true },
+        last_name: { type: "string", required: true },
+      },
+    );
+
+    if (!isValidFields.isValid) {
+      return responseHandler.fail({
+        message: "Invalid fields",
+        data: isValidFields.errors,
+        code: 400,
+      });
+    }
+    return next();
+  }
+
+  async isUniqueEmail(req: Request, res: Response, next: NextFunction) {
+    logger.info("---------- AUTH MIDDLEWARE ----------: isUniqueEmail");
+    const responseHandler = new ResponseHandler(req, res);
+    try {
+      const { email } = req.body;
+      const user = await userService.getUserByEmail(email);
+
+      if (user) {
+        return responseHandler.fail({
+          message: "Email already exists",
+          data: null,
+          code: 400,
+        });
+      }
+
+      return next();
+    } catch (error) {
+      return responseHandler.fail({
+        message: "Error checking email",
+        data: null,
+        code: 500,
+      });
+    }
+  }
+
+  async isUniqueUsername(req: Request, res: Response, next: NextFunction) {
+    logger.info("---------- AUTH MIDDLEWARE ----------: isUniqueUsername");
+    const responseHandler = new ResponseHandler(req, res);
+    try {
+      const { email } = req.body;
+      const user = await userService.getUserByUsername(email);
+
+      if (user) {
+        return responseHandler.fail({
+          message: "Username already exists",
+          data: null,
+          code: 400,
+        });
+      }
+
+      return next();
+    } catch (error) {
+      return responseHandler.fail({
+        message: "Error checking username",
+        data: null,
+        code: 500,
+      });
+    }
+  }
+
+  async isValidRegistrationPassowrd(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    logger.info(
+      "---------- AUTH MIDDLEWARE ----------: isValidRegistrationPassowrd",
+    );
+    const responseHandler = new ResponseHandler(req, res);
+    const { password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return responseHandler.fail({
+        message: "Passwords do not match",
+        data: null,
+        code: 400,
+      });
+    }
+
+    if (!GenericHelper.isValidPassword(password)) {
+      return responseHandler.fail({
+        message: "Password is invalid - weak password",
+        data: null,
+        code: 400,
+      });
+    }
+
+    return next();
+  }
+
   async isValidUsernameAndPassword(
     req: Request,
     res: Response,
@@ -35,6 +177,7 @@ class AuthMiddleware implements IAuthMiddleware {
     logger.info(
       "---------- AUTH MIDDLEWARE ----------: isValidUsernameAndPassword",
     );
+    const responseHandler = new ResponseHandler(req, res);
     const { username, password } = req.body;
     const user = (await userService.getUserByUsername(username)) as unknown as {
       password: string;
@@ -44,7 +187,11 @@ class AuthMiddleware implements IAuthMiddleware {
         return next();
       }
     }
-    res.status(400).send("Invalid username or password");
+    return responseHandler.fail({
+      message: "invalid username or password",
+      data: null,
+      code: 400,
+    });
   }
 
   async isValidEmailAndPassword(
@@ -55,17 +202,21 @@ class AuthMiddleware implements IAuthMiddleware {
     logger.info(
       "---------- AUTH MIDDLEWARE ----------: isValidEmailAndPassword",
     );
+    const responseHandler = new ResponseHandler(req, res);
     const { email, password } = req.body;
     const user = (await userService.getUserByEmail(email)) as unknown as {
       password: string;
     };
-    console.log("🚀 ~ AuthMiddleware ~ user:", user);
     if (user) {
       if (GenericHelper.compareHash(password, user.password)) {
         return next();
       }
     }
-    res.status(400).send("Invalid email or password");
+    return responseHandler.fail({
+      message: "Invalid email or password",
+      data: null,
+      code: 400,
+    });
   }
 
   async checkToken(req: Request, res: Response, next: NextFunction) {
@@ -131,11 +282,6 @@ class AuthMiddleware implements IAuthMiddleware {
           code: 400,
         });
       }
-
-      console.log(
-        "🚀 ~ AuthMiddleware ~ GenericHelper.isValidPassword(newPassword):",
-        GenericHelper.isValidPassword(newPassword),
-      );
       if (!GenericHelper.isValidPassword(newPassword)) {
         return responseHandler.fail({
           message: "Password is invalid - weak password",

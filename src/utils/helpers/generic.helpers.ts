@@ -4,6 +4,11 @@ import db from "../../config/database";
 import ENVS from "../../config/envs";
 import bcrypt from "bcrypt";
 
+type FieldValidation = {
+  type: "string" | "number";
+  required: boolean;
+};
+
 export class GenericHelper {
   static generateId(length = 6, prefix = "", suffix = ""): string {
     const randomNumber = GenericHelper.generateRandomNumber(length);
@@ -117,5 +122,35 @@ export class GenericHelper {
       hasNumber &&
       hasSpecialChar
     );
+  }
+
+  static verifyFields(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    requestFields: Record<string, any>,
+    fieldDefinitions: Record<string, FieldValidation>,
+  ): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    for (const [field, { type, required }] of Object.entries(
+      fieldDefinitions,
+    )) {
+      const value = requestFields[field];
+
+      if (required && (value === undefined || value === null)) {
+        errors.push(`Field '${field}' is required but missing.`);
+        continue;
+      }
+
+      if (value !== undefined && value !== null && typeof value !== type) {
+        errors.push(
+          `Field '${field}' must be of type '${type}', but got '${typeof value}'.`,
+        );
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 }

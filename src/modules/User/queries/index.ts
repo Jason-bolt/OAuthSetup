@@ -4,6 +4,7 @@ interface IUserQueries {
   createOauthUser: string;
   getUserByUsername: string;
   updatePassword: string;
+  registerUser: string;
 }
 
 const userQueries: IUserQueries = {
@@ -13,6 +14,7 @@ const userQueries: IUserQueries = {
           UPDATE user_states SET email = $2 WHERE state = $7`,
   getUserByUsername: `SELECT id, username, password FROM users WHERE username = $1;`,
   updatePassword: `UPDATE users SET password = $1 WHERE id = $2;`,
+  registerUser: `INSERT INTO users (id, email, first_name, last_name, username, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, first_name, last_name, username;`,
 };
 
 export default userQueries;
