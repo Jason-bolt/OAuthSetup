@@ -2,6 +2,7 @@ import crypto from "crypto";
 import * as jwt from "jsonwebtoken";
 import db from "../../config/database";
 import ENVS from "../../config/envs";
+import bcrypt from "bcrypt";
 
 export class GenericHelper {
   static generateId(length = 6, prefix = "", suffix = ""): string {
@@ -90,5 +91,31 @@ export class GenericHelper {
     const max = Math.pow(10, length) - 1;
 
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  static hashString(string: string) {
+    return bcrypt.hashSync(string, 10);
+  }
+
+  static compareHash(string: string, hash: string) {
+    return bcrypt.compareSync(string, hash);
+  }
+
+  static isValidPassword(password: string): boolean {
+    // Check if the password meets the criteria
+    const hasMinLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    // Return true only if all conditions are met
+    return (
+      hasMinLength &&
+      hasUpperCase &&
+      hasLowerCase &&
+      hasNumber &&
+      hasSpecialChar
+    );
   }
 }

@@ -6,6 +6,7 @@ import logger from "../../../config/logger";
 import authService from "../service";
 import ResponseHandler from "../../../utils/helpers/response.handler";
 import { StatusCodes } from "http-status-codes";
+import { IUser } from "../../../config/models/User";
 
 class AuthController implements IauthController {
   constructor(
@@ -160,6 +161,43 @@ class AuthController implements IauthController {
       return response.success({
         message: "Signed in with Facebook successfully",
         data: facebookTokenData,
+      });
+    } catch (error: any) {
+      this._logger.info("An error occured in AuthController", error?.message);
+      throw error;
+    }
+  };
+
+  login = async (req: Request, res: Response): Promise<object> => {
+    try {
+      this._logger.info("---------- AUTH CONTROLLER ----------: Logging in");
+      const response = new ResponseHandler(req, res);
+      const { email } = req.body;
+      const localToken = await this.authService.login({ email });
+      return response.success({
+        message: "Logged in successfully",
+        data: localToken,
+      });
+    } catch (error: any) {
+      this._logger.info("An error occured in AuthController", error?.message);
+      throw error;
+    }
+  };
+
+  resetPassword = async (req: Request, res: Response): Promise<object> => {
+    try {
+      this._logger.info(
+        "---------- AUTH CONTROLLER ----------: Reset password",
+      );
+      const response = new ResponseHandler(req, res);
+      const { newPassword } = req.body;
+      const localToken = await this.authService.resetPassword({
+        newPassword,
+        user: req.user as IUser,
+      });
+      return response.success({
+        message: "Password reset successfully",
+        data: localToken,
       });
     } catch (error: any) {
       this._logger.info("An error occured in AuthController", error?.message);
